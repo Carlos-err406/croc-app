@@ -96,8 +96,21 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
         _uiState.update { it.copy(codePhrase = code.replace(" ", "-")) }
     }
 
-    fun setCodeFromQr(code: String) {
-        _uiState.update { it.copy(codePhrase = normalizeCodePhrase(code)) }
+    fun setCodeFromQr(scanned: String) {
+        _uiState.update { it.copy(codePhrase = normalizeCodePhrase(extractScannedCode(scanned))) }
+    }
+
+    /** Accept a bare code or a deep link from a scanned QR:
+     *  croc://receive?code=…, croc://<code>, or https://…/croc/receive?code=…. */
+    private fun extractScannedCode(raw: String): String {
+        val t = raw.trim()
+        val uri = runCatching { Uri.parse(t) }.getOrNull()
+        if (uri != null && (uri.scheme == "croc" || uri.scheme == "http" || uri.scheme == "https")) {
+            uri.getQueryParameter("code")?.trim()?.let { if (it.isNotEmpty()) return it }
+            val seg = (uri.host ?: uri.lastPathSegment)?.trim()
+            if (!seg.isNullOrEmpty() && seg != "receive") return seg
+        }
+        return t
     }
 
     fun startReceiveWithCode(code: String) {
