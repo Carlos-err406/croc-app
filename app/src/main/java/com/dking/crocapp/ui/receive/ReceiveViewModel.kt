@@ -97,20 +97,10 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun setCodeFromQr(scanned: String) {
-        _uiState.update { it.copy(codePhrase = normalizeCodePhrase(extractScannedCode(scanned))) }
-    }
-
-    /** Accept a bare code or a deep link from a scanned QR:
-     *  croc://receive?code=…, croc://<code>, or https://…/croc/receive?code=…. */
-    private fun extractScannedCode(raw: String): String {
-        val t = raw.trim()
-        val uri = runCatching { Uri.parse(t) }.getOrNull()
-        if (uri != null && (uri.scheme == "croc" || uri.scheme == "http" || uri.scheme == "https")) {
-            uri.getQueryParameter("code")?.trim()?.let { if (it.isNotEmpty()) return it }
-            val seg = (uri.host ?: uri.lastPathSegment)?.trim()
-            if (!seg.isNullOrEmpty() && seg != "receive") return seg
+        // A scanned QR may be a deep link (croc://…/https://…); pull the code out.
+        _uiState.update {
+            it.copy(codePhrase = normalizeCodePhrase(com.dking.crocapp.util.extractCrocCode(scanned)))
         }
-        return t
     }
 
     fun startReceiveWithCode(code: String) {
