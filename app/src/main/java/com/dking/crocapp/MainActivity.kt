@@ -146,13 +146,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Extract the transfer code from a croc:// deep link:
-     *  croc://receive?code=<code>  (case-preserving, preferred) or croc://<code>. */
+    /** Extract the transfer code from a deep link — the croc:// scheme
+     *  (croc://receive?code=…, croc://<code>) or the https App Link
+     *  (https://carlos-err406.github.io/croc/receive?code=…). Null if none. */
     private fun parseCrocCode(uri: Uri?): String? {
-        if (uri == null || uri.scheme != "croc") return null
+        if (uri == null) return null
+        if (uri.scheme != "croc" && uri.scheme != "https" && uri.scheme != "http") return null
         uri.getQueryParameter("code")?.trim()?.let { if (it.isNotEmpty()) return it }
-        uri.lastPathSegment?.trim()?.let { if (it.isNotEmpty()) return it }
-        uri.host?.trim()?.let { if (it.isNotEmpty() && it != "receive") return it }
+        // croc://<code> — the code is the authority; for https the code only
+        // ever comes via ?code=, so ignore path segments like "croc"/"receive".
+        if (uri.scheme == "croc") {
+            (uri.host ?: uri.lastPathSegment)?.trim()?.let {
+                if (it.isNotEmpty() && it != "receive") return it
+            }
+        }
         return null
     }
 }

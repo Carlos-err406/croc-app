@@ -65,6 +65,18 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="croc" />
             </intent-filter>
+
+            <!-- Verified App Link: https://carlos-err406.github.io/croc/… opens the
+                 app directly (no browser) once assetlinks.json is verified. Same
+                 link is tappable in chats and falls back to the web page otherwise. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="carlos-err406.github.io"
+                    android:pathPrefix="/croc/" />
+            </intent-filter>
         </activity>
 
         <service
