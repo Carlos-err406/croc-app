@@ -17,3 +17,8 @@ fun extractCrocCode(raw: String): String {
     }
     return t
 }
+
+/** The shareable https link that opens the app into receiving this code
+ *  (verified App Link; falls back to the web page + install). */
+fun receiveLink(code: String): String =
+    "https://carlos-err406.github.io/croc/receive?code=" + Uri.encode(code.trim())

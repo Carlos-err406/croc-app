@@ -43,6 +43,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AttachFile
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.InsertDriveFile
@@ -663,6 +664,18 @@ fun SendScreen(
                             label = { Text(stringResource(R.string.send_share_qr)) },
                             leadingIcon = {
                                 Icon(Icons.Rounded.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                            }
+                        )
+                        AssistChip(
+                            onClick = {
+                                clipboardManager.setText(
+                                    AnnotatedString(com.dking.crocapp.util.receiveLink(uiState.codePhrase))
+                                )
+                            },
+                            enabled = uiState.codePhrase.isNotBlank(),
+                            label = { Text(stringResource(R.string.send_copy_link)) },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.Link, contentDescription = null, modifier = Modifier.size(18.dp))
                             }
                         )
                     }

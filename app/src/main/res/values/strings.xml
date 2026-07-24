@@ -116,6 +116,7 @@
     <string name="send_show_code">Show code</string>
     <string name="send_hide_code">Hide code</string>
     <string name="send_copy_code">Copy code</string>
+    <string name="send_copy_link">Copy link</string>
     <string name="send_share_code">Share code</string>
     <string name="send_regenerate">Regenerate</string>
     <string name="send_again">Send Again</string>
