@@ -19,6 +19,13 @@ fun extractCrocCode(raw: String): String {
 }
 
 /** The shareable https link that opens the app into receiving this code
- *  (verified App Link; falls back to the web page + install). */
+ *  (verified App Link; falls back to the web page + install). Used by "Copy link". */
 fun receiveLink(code: String): String =
     "https://carlos-err406.github.io/croc/receive?code=" + Uri.encode(code.trim())
+
+/** The croc:// deep link for a code. The QR encodes THIS (not the bare code or the
+ *  https link): scanning it with a phone camera / QR app opens the app directly via
+ *  the custom scheme, whereas a scanned https App Link doesn't reliably hand off and
+ *  a bare code isn't a link at all. Every in-app scanner still parses the code out. */
+fun receiveDeepLink(code: String): String =
+    "croc://receive?code=" + Uri.encode(code.trim())

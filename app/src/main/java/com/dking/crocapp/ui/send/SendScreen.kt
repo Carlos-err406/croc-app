@@ -726,7 +726,8 @@ fun SendScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             QrCodeImage(
-                                data = uiState.codePhrase,
+                                // croc:// deep link so a phone camera opens the app directly
+                                data = com.dking.crocapp.util.receiveDeepLink(uiState.codePhrase),
                                 size = 180.dp
                             )
                         }
