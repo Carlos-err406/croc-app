@@ -46,6 +46,10 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
     private val crocProcess = CrocProcess(application, binaryManager, prefsRepo)
     private var currentOutputDir: File? = null
 
+    // Local-only override from a scanned QR / deep link, applied to the next
+    // receive only. Null = use the saved preference. Cleared on manual code edits.
+    private var pendingLocalOverride: Boolean? = null
+
     private val _uiState = MutableStateFlow(ReceiveUiState())
     val uiState: StateFlow<ReceiveUiState> = _uiState.asStateFlow()
 
@@ -92,15 +96,18 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun updateCodePhrase(code: String) {
+        // Manual edit → a plain code, drop any settings carried in from a scan.
+        pendingLocalOverride = null
         // Replace spaces with dashes, like the original app
         _uiState.update { it.copy(codePhrase = code.replace(" ", "-")) }
     }
 
     fun setCodeFromQr(scanned: String) {
-        // A scanned QR may be a deep link (croc://…/https://…); pull the code out.
-        _uiState.update {
-            it.copy(codePhrase = normalizeCodePhrase(com.dking.crocapp.util.extractCrocCode(scanned)))
-        }
+        // A scanned QR may be a deep link (croc://…&local=1 / https://…); pull the
+        // code out AND honor any embedded local-only setting for this receive.
+        val target = com.dking.crocapp.util.parseReceiveTarget(scanned)
+        pendingLocalOverride = if (target.local) true else null
+        _uiState.update { it.copy(codePhrase = normalizeCodePhrase(target.code)) }
     }
 
     fun startReceiveWithCode(code: String) {
@@ -131,7 +138,7 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
             currentOutputDir = outputDir
 
             _uiState.update { it.copy(receivedFiles = emptyList()) }
-            crocProcess.receive(code, outputDir)
+            crocProcess.receive(code, outputDir, pendingLocalOverride)
         }
     }
 

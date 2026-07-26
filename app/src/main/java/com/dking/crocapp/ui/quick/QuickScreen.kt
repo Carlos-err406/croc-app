@@ -173,6 +173,7 @@ fun QuickScreen(
                         receivedText = uiState.receivedText,
                         receivedFiles = uiState.receivedFiles,
                         receiveLocationLabel = uiState.receiveLocationLabel,
+                        forceLocal = uiState.forceLocal,
                         onCancel = { viewModel.cancelTransfer() },
                         onDismiss = { viewModel.dismissResult() },
                         onCopyText = { text ->
@@ -340,6 +341,7 @@ private fun TransferStatusSection(
     receivedText: String?,
     receivedFiles: List<ReceivedFile>,
     receiveLocationLabel: String = "Downloads/croc-received",
+    forceLocal: Boolean = false,
     onCancel: () -> Unit,
     onDismiss: () -> Unit,
     onCopyText: (String) -> Unit
@@ -357,7 +359,8 @@ private fun TransferStatusSection(
             QuickSendTransferCard(
                 state = state,
                 code = activeCode,
-                sharePreview = sharePreview
+                sharePreview = sharePreview,
+                forceLocal = forceLocal
             )
         } else {
             QuickReceiveTransferCard(
@@ -394,7 +397,8 @@ private fun TransferStatusSection(
 private fun QuickSendTransferCard(
     state: CrocTransferState,
     code: String,
-    sharePreview: List<QuickSharePreview>
+    sharePreview: List<QuickSharePreview>,
+    forceLocal: Boolean = false
 ) {
     val hasSidePanel = state !is CrocTransferState.Error
 
@@ -462,8 +466,9 @@ private fun QuickSendTransferCard(
                     ) {
                         if (code.isNotBlank()) {
                             QrCodeImage(
-                                // croc:// deep link so a phone camera opens the app directly
-                                data = com.dking.crocapp.util.receiveDeepLink(code),
+                                // croc:// deep link so a phone camera opens the app directly;
+                                // embeds &local=1 when local-only is on so the receiver matches.
+                                data = com.dking.crocapp.util.receiveDeepLink(code, forceLocal),
                                 size = 100.dp,
                                 padding = 4.dp
                             )

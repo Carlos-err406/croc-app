@@ -42,7 +42,9 @@ data class QuickUiState(
     val statusDetail: String = "Tap Send or Receive to start",
     val receivedText: String? = null,
     val receivedFiles: List<ReceivedFile> = emptyList(),
-    val receiveLocationLabel: String = "Downloads/croc-received"
+    val receiveLocationLabel: String = "Downloads/croc-received",
+    // Mirrors prefs.forceLocal so the QR can embed &local=1 for the receiver.
+    val forceLocal: Boolean = false
 )
 
 class QuickViewModel(application: Application) : AndroidViewModel(application) {
@@ -166,7 +168,8 @@ class QuickViewModel(application: Application) : AndroidViewModel(application) {
                     state.copy(
                         quickSendCode = prefs.effectiveQuickSendCode,
                         quickReceiveCode = prefs.effectiveQuickReceiveCode,
-                        savedCodePhrases = prefs.savedCodePhrases
+                        savedCodePhrases = prefs.savedCodePhrases,
+                        forceLocal = prefs.forceLocal
                     )
                 }
             }
@@ -241,11 +244,13 @@ class QuickViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startReceiveFromQr(code: String) {
-        // A scanned QR may be a deep link (croc://…/https://…); pull the code out.
-        startReceiveInternal(com.dking.crocapp.util.extractCrocCode(code), "qr")
+        // A scanned QR may be a deep link (croc://…&local=1 / https://…); pull the
+        // code out AND honor any embedded local-only setting for this receive.
+        val target = com.dking.crocapp.util.parseReceiveTarget(code)
+        startReceiveInternal(target.code, "qr", if (target.local) true else null)
     }
 
-    private fun startReceiveInternal(code: String, action: String) {
+    private fun startReceiveInternal(code: String, action: String, localOverride: Boolean? = null) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -265,7 +270,7 @@ class QuickViewModel(application: Application) : AndroidViewModel(application) {
             ).apply { mkdirs() }
             currentOutputDir = outputDir
 
-            crocProcess.receive(code, outputDir)
+            crocProcess.receive(code, outputDir, localOverride)
         }
     }
 

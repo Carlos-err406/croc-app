@@ -139,8 +139,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             Intent.ACTION_VIEW -> {
-                val code = parseCrocCode(intent.data)
-                if (code != null) SharedContent.ReceiveCode(code) else SharedContent.None
+                // Keep the whole link (not just the code) so embedded settings like
+                // &local=1 survive to setCodeFromQr, which parses code + settings.
+                val raw = intent.data?.toString()
+                if (raw != null && parseCrocCode(intent.data) != null) {
+                    SharedContent.ReceiveCode(raw)
+                } else SharedContent.None
             }
             else -> SharedContent.None
         }
@@ -168,7 +172,8 @@ sealed class SharedContent {
     data object None : SharedContent()
     data class Files(val uris: List<Uri>) : SharedContent()
     data class Text(val text: String) : SharedContent()
-    data class ReceiveCode(val code: String) : SharedContent()
+    /** The raw croc:// / https receive link (code + any embedded settings). */
+    data class ReceiveCode(val link: String) : SharedContent()
 }
 
 @Composable
@@ -223,7 +228,7 @@ fun CrocApp(
                 // croc:// deep link: fill the code and (if the croc binary is ready)
                 // start receiving, mirroring the QR-scan flow.
                 androidx.compose.runtime.LaunchedEffect(Unit) {
-                    receiveViewModel.setCodeFromQr(sharedContent.code)
+                    receiveViewModel.setCodeFromQr(sharedContent.link)
                     navController.navigate(CrocDestination.Receive.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true

@@ -70,7 +70,10 @@ class CrocProcess(
      * Build common global flags from preferences.
      * Only includes flags that actually exist in croc v10.6.0.
      */
-    private fun buildGlobalFlags(prefs: UserPreferencesRepository.CrocPreferences): List<String> {
+    private fun buildGlobalFlags(
+        prefs: UserPreferencesRepository.CrocPreferences,
+        localOverride: Boolean? = null
+    ): List<String> {
         val relayAddress = resolveRelayAddress(prefs.relayAddress)
 
         return buildList {
@@ -85,7 +88,8 @@ class CrocProcess(
             if (prefs.pakeCurve.isNotBlank()) {
                 add("--curve"); add(prefs.pakeCurve)
             }
-            if (prefs.forceLocal) add("--local")
+            // A scanned/clicked link can force local mode for this transfer only.
+            if (localOverride ?: prefs.forceLocal) add("--local")
             if (prefs.disableCompression) add("--no-compress")
             if (prefs.uploadThrottle.isNotBlank()) {
                 add("--throttleUpload"); add(prefs.uploadThrottle)
@@ -198,7 +202,7 @@ class CrocProcess(
         }
     }
 
-    suspend fun receive(code: String, outputDir: File) {
+    suspend fun receive(code: String, outputDir: File, localOverride: Boolean? = null) {
         withContext(Dispatchers.IO) {
             try {
                 _state.value = CrocTransferState.Preparing
@@ -207,7 +211,7 @@ class CrocProcess(
                 outputDir.mkdirs()
 
                 val command = mutableListOf(binaryPath, "--yes", "--overwrite").apply {
-                    addAll(buildGlobalFlags(prefs))
+                    addAll(buildGlobalFlags(prefs, localOverride))
                 }
 
                 executeWithDnsFallback(

@@ -44,7 +44,9 @@ data class SendUiState(
     val selectedFolderName: String? = null,
     val selectedFolderFileCount: Int = 0,
     val selectedFolderSize: Long = 0,
-    val selectedFolderPath: String? = null
+    val selectedFolderPath: String? = null,
+    // Mirrors prefs.forceLocal so the QR can embed &local=1 for the receiver.
+    val forceLocal: Boolean = false
 ) {
     // Backward compat helper
     val isTextMode: Boolean get() = sendMode == SendMode.TEXT
@@ -87,7 +89,8 @@ class SendViewModel(application: Application) : AndroidViewModel(application) {
                             prefs.defaultCodePhrase.ifBlank { generateRandomCode() }
                         } else state.codePhrase,
                         defaultCodePhrase = prefs.defaultCodePhrase,
-                        savedCodePhrases = prefs.savedCodePhrases
+                        savedCodePhrases = prefs.savedCodePhrases,
+                        forceLocal = prefs.forceLocal
                     )
                 }
             }

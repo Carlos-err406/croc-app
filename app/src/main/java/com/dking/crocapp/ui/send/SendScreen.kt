@@ -727,7 +727,7 @@ fun SendScreen(
                         ) {
                             QrCodeImage(
                                 // croc:// deep link so a phone camera opens the app directly
-                                data = com.dking.crocapp.util.receiveDeepLink(uiState.codePhrase),
+                                data = com.dking.crocapp.util.receiveDeepLink(uiState.codePhrase, uiState.forceLocal),
                                 size = 180.dp
                             )
                         }
