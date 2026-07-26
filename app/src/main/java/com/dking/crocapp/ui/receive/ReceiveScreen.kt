@@ -299,9 +299,10 @@ fun ReceiveScreen(
                                     )
                                 }
                                 Text(
-                                    "They send with croc ${vm.sender}, you have ${vm.ours} \u2014 these don't " +
-                                        (if (vm.senderIsNewer) "transfer reliably. Update this app, then try again."
-                                        else "transfer reliably. Ask them to update their Croc app."),
+                                    "They send with croc ${vm.sender}, you have ${vm.ours}. The transfer " +
+                                        "might fail if both ends don't have the same bundled croc version \u2014 " +
+                                        (if (vm.senderIsNewer) "update this app, then try again."
+                                        else "ask them to update their Croc app."),
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
