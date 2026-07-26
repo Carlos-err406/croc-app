@@ -38,8 +38,10 @@ fun extractCrocCode(raw: String): String = parseReceiveTarget(raw).code
 
 /** The shareable https link that opens the app into receiving this code
  *  (verified App Link; falls back to the web page + install). Used by "Copy link". */
-fun receiveLink(code: String): String =
-    "https://carlos-err406.github.io/croc/receive?code=" + Uri.encode(code.trim())
+fun receiveLink(code: String, local: Boolean = false): String {
+    val base = "https://carlos-err406.github.io/croc/receive?code=" + Uri.encode(code.trim())
+    return if (local) "$base&local=1" else base
+}
 
 /** The croc:// deep link for a code. The QR encodes THIS (not the bare code or the
  *  https link): scanning it with a phone camera / QR app opens the app directly via

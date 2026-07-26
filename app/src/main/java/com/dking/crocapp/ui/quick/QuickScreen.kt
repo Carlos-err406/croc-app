@@ -448,7 +448,7 @@ private fun QuickSendTransferCard(
                     if (code.isNotBlank()) {
                         val clip = LocalClipboardManager.current
                         TextButton(
-                            onClick = { clip.setText(AnnotatedString(com.dking.crocapp.util.receiveLink(code))) },
+                            onClick = { clip.setText(AnnotatedString(com.dking.crocapp.util.receiveLink(code, forceLocal))) },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Icon(Icons.Rounded.Link, contentDescription = null, modifier = Modifier.size(16.dp))

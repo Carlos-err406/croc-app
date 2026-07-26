@@ -669,7 +669,7 @@ fun SendScreen(
                         AssistChip(
                             onClick = {
                                 clipboardManager.setText(
-                                    AnnotatedString(com.dking.crocapp.util.receiveLink(uiState.codePhrase))
+                                    AnnotatedString(com.dking.crocapp.util.receiveLink(uiState.codePhrase, uiState.forceLocal))
                                 )
                             },
                             enabled = uiState.codePhrase.isNotBlank(),
