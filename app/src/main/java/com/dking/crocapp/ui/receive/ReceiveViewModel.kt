@@ -35,7 +35,10 @@ data class ReceiveUiState(
     val savedCodePhrases: List<String> = emptyList(),
     val receivedFiles: List<ReceivedFile> = emptyList(),
     val sessionOverrideUri: Uri? = null,
-    val receiveLocationLabel: String = "Downloads/croc-received"
+    val receiveLocationLabel: String = "Downloads/croc-received",
+    /** Set when a scanned/opened link embedded a croc version that can't interoperate
+     *  with ours — the UI warns before attempting. Null = nothing to warn about. */
+    val versionMismatch: com.dking.crocapp.util.VersionMismatch? = null
 )
 
 class ReceiveViewModel(application: Application) : AndroidViewModel(application) {
@@ -99,7 +102,7 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
         // Manual edit → a plain code, drop any settings carried in from a scan.
         pendingLocalOverride = null
         // Replace spaces with dashes, like the original app
-        _uiState.update { it.copy(codePhrase = code.replace(" ", "-")) }
+        _uiState.update { it.copy(codePhrase = code.replace(" ", "-"), versionMismatch = null) }
     }
 
     fun setCodeFromQr(scanned: String) {
@@ -107,7 +110,10 @@ class ReceiveViewModel(application: Application) : AndroidViewModel(application)
         // code out AND honor any embedded local-only setting for this receive.
         val target = com.dking.crocapp.util.parseReceiveTarget(scanned)
         pendingLocalOverride = if (target.local) true else null
-        _uiState.update { it.copy(codePhrase = normalizeCodePhrase(target.code)) }
+        val mismatch = com.dking.crocapp.util.versionMismatch(target.crocVersion)
+        _uiState.update {
+            it.copy(codePhrase = normalizeCodePhrase(target.code), versionMismatch = mismatch)
+        }
     }
 
     fun startReceiveWithCode(code: String) {
